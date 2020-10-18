@@ -42,5 +42,12 @@ setup(
         "Topic :: Software Development :: Interpreters",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    packages=find_packages(exclude=("tests",))
+    packages=find_packages(exclude=("tests",)),
+    entry_points={
+        'sifter_extensions': [
+            # sifter commands
+            'pipe = sifter_extensions.commands.pipe:CommandPipe',
+            'rewrite = sifter_extensions.commands.rewrite:CommandRewrite'
+        ]
+    }
 )

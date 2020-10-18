@@ -1,30 +1,27 @@
-import sifter.grammar
-import sifter.validators
+from email.message import Message
+from typing import (
+    Text
+)
 
-__all__ = ('CommandRewrite',)
+from sifter.grammar.string import expand_variables
+from sifter.grammar.command import Command
+from sifter.validators.stringlist import StringList
+from sifter.grammar.state import EvaluationState
 
-# section 4.1
-class CommandRewrite(sifter.grammar.Command):
 
-    RULE_IDENTIFIER = 'REWRITE'
+class CommandRewrite(Command):
 
-    def __init__(self, arguments=None, tests=None, block=None):
-        super(CommandRewrite, self).__init__(arguments, tests, block)
-        _, positional_args = self.validate_arguments(
-                {},
-                [ sifter.validators.StringList(length=1),
-                  sifter.validators.StringList(length=1),
-                ],
-            )
-        self.validate_tests_size(0)
-        self.validate_block_size(0)
-        self.search = positional_args[0][0]
-        self.replace = positional_args[1][0]
+    HANDLER_ID: Text = 'REWRITE'
+    EXTENSION_NAME = 'rewrite'
+    POSITIONAL_ARGS = [
+        StringList(length=1),
+        StringList(length=1),
+    ]
 
-    def evaluate(self, message, state):
+    def evaluate(self, message: Message, state: EvaluationState) -> None:
         state.check_required_extension('rewrite', 'REWRITE')
-        search = sifter.grammar.string.expand_variables(self.search, state)
-        replace = sifter.grammar.string.expand_variables(self.replace, state)
-        state.actions.append('rewrite', (search, replace))
-
-CommandRewrite.register()
+        search = self.positional_args[0][0]  # type: ignore
+        replace = self.positional_args[1][0]  # type: ignore
+        search = expand_variables(search, state)
+        replace = expand_variables(replace, state)
+        state.actions.append('rewrite', (search, replace))  # type: ignore
